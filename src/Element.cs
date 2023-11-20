@@ -15,7 +15,9 @@ namespace MenuEngine.src
             AddEventListeners();
 
             children = new();
-            Parent = parent;
+
+            Parent = parent ?? Project.Instance.RootElement;
+            Parent?.children.Add(this);
         }
 
         private void AddEventListeners()
@@ -39,6 +41,13 @@ namespace MenuEngine.src
         public void Dispose()
         {
             RemoveEventListeners();
+
+            foreach (Element child in children)
+            {
+                child.Dispose();
+            }
+
+            Parent?.children.Remove(this);
         }
 
         public virtual void Update()

@@ -1,28 +1,37 @@
 ﻿using MenuEngine.src.elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics;
 
 namespace MenuEngine.src
 {
     public abstract class Project
     {
 
-        public RootElement RootElement { get; private set; }
+        public static Project Instance { get; private set; }
+
+        public RootElement? RootElement { get; private set; }
+
+        public Font? DefaultFont { get; private set; }
 
         /// <summary>
         /// This method is called before <see cref="Engine.Instance"/> exists.
         /// </summary>
         public Project()
         {
-
+            Instance = this;
         }
 
         /// <summary>
-        /// Called after <see cref="Engine.Instance"/> exists."/>
+        /// Called after <see cref="Engine.Instance"/> exists. and after <see cref="LoadAssets"/> is called.
         /// </summary>
         internal void Initialize()
         {
+            Debug.WriteLine("Initializing project...");
+
             RootElement = new RootElement();
+
+            DefaultFont = new("Arial");
 
             OnInitialize();
         }
@@ -34,9 +43,16 @@ namespace MenuEngine.src
         /// </summary>
         public virtual void LoadAssets()
         {
+            Debug.WriteLine("Loading assets...");
+
             Texture2D blankTexture = new(Engine.Instance.GraphicsDevice, 1, 1);
             blankTexture.SetData(new[] { Color.White });
-            Assets.AddAsset("BlankTexture", blankTexture);
+            Assets.AddAssetDirect("BlankTexture", blankTexture);
+
+            Assets.LoadAsset<SpriteFont>("Arial");
+            Assets.LoadAsset<SpriteFont>("ArialBold");
+            Assets.LoadAsset<SpriteFont>("ArialItalic");
+            Assets.LoadAsset<SpriteFont>("ArialBoldItalic");
         }
 
     }

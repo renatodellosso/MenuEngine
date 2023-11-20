@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace MenuEngine.src.elements
 {
@@ -7,25 +6,23 @@ namespace MenuEngine.src.elements
     {
 
         protected Vector2 pos;
+        /// <summary>
+        /// The rect's position, in percentages of the screen size.
+        /// </summary>
         public virtual Vector2 Pos { get => pos; set => pos = value; }
 
-        protected Vector2 size;
-        public virtual Vector2 Size { get => size; set => size = value; }
+        protected Vector2? size;
+        /// <summary>
+        /// The rect's size, in percentages of the screen size.
+        /// </summary>
+        public virtual Vector2 Size { get => size.GetValueOrDefault(); set => size = value; }
 
-        protected virtual Color Color { get; set; }
+        public RectElement(Vector2 position, Vector2? size) : this(null, position, size) { }
 
-        public RectElement(Vector2 position, Vector2 size, Color color) : this(null, position, size, color) { }
-
-        public RectElement(Element? parent, Vector2 position, Vector2 size, Color color) : base(parent)
+        public RectElement(Element? parent, Vector2 position, Vector2? size) : base(parent)
         {
             Pos = position;
-            Size = size;
-            Color = color;
-        }
-
-        public override void Draw()
-        {
-            Engine.SpriteBatch.Draw(Assets.GetAsset<Texture2D>("BlankTexture"), Pos, new Rectangle((int)Pos.X, (int)Pos.Y, (int)Size.X, (int)Size.Y), Color);
+            Size = size.GetValueOrDefault();
         }
 
     }

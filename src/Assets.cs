@@ -20,19 +20,32 @@ namespace MenuEngine.src
 
         }
 
+        /// <summary>
+        /// Will not add the asset if it is null.
+        /// </summary>
         public static void LoadAsset<T>(string path)
         {
-            instance.assets.TryAdd(path, Engine.Instance.Content.Load<T>(path));
-        }
+            T asset = Engine.Instance.Content.Load<T>(path);
 
-        public static void AddAsset<T>(string path, T asset)
-        {
+            if (asset == null) return;
+
             instance.assets.TryAdd(path, asset);
         }
 
-        public static T GetAsset<T>(string path)
+        /// <summary>
+        /// Directly adds to the asset to <see cref="assets"/>. Does not load the asset from the content folder.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="path"></param>
+        /// <param name="asset"></param>
+        public static void AddAssetDirect<T>(string path, T asset)
         {
-            return (T)instance.assets[path];
+            instance.assets.TryAdd(path, asset!);
+        }
+
+        public static T? GetAsset<T>(string path)
+        {
+            return instance.assets.TryGetValue(path, out object? asset) ? (T)asset : default!;
         }
     }
 }
