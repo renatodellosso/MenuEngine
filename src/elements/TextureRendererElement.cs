@@ -14,7 +14,7 @@ namespace MenuEngine.src.elements
         public TextureRendererElement(Element? parent, Vector2 position, Vector2 size, Color? color = null, Texture2D? texture = null) : base(parent, position, size)
         {
             Color = color ?? Color.White;
-            Texture = texture ?? Assets.GetAsset<Texture2D>("BlankTexture");
+            Texture = texture ?? Assets.GetAsset<Texture2D>("BlankTexture")!;
         }
 
         public override void Draw()

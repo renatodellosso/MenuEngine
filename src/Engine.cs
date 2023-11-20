@@ -9,7 +9,7 @@ namespace MenuEngine.src
 
         internal static Engine Instance { get; private set; }
 
-        private Project project;
+        private readonly Project project;
 
         private GraphicsDeviceManager graphics;
 
@@ -29,6 +29,16 @@ namespace MenuEngine.src
         {
             add => Instance.OnUpdate += value;
             remove => Instance.OnUpdate -= value;
+        }
+
+        public event Action OnLateUpdate;
+        /// <summary>
+        /// Called after all <see cref="OnUpdate"/> events.
+        /// </summary>
+        public static event Action OnLateUpdateEvent
+        {
+            add => Instance.OnLateUpdate += value;
+            remove => Instance.OnLateUpdate -= value;
         }
 
         public event Action OnDraw;
@@ -61,7 +71,6 @@ namespace MenuEngine.src
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             assets = new Assets();
-
             project.LoadAssets();
         }
 
@@ -70,6 +79,8 @@ namespace MenuEngine.src
             deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             OnUpdate?.Invoke();
+
+            OnLateUpdate?.Invoke();
 
             base.Update(gameTime);
         }

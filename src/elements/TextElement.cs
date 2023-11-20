@@ -61,10 +61,10 @@ namespace MenuEngine.src.elements
 
         public Font Font { get; set; }
 
-        public TextElement(Vector2 position, string text = "", Font? font = null) : this(null, position, text, font)
+        public TextElement(Vector2 position, Vector2 size, string text = "", Font? font = null) : this(null, position, size, text, font)
         { }
 
-        public TextElement(Element? parent, Vector2 position, string text = "", Font? font = null) : base(parent, position, null)
+        public TextElement(Element? parent, Vector2 position, Vector2 size, string text = "", Font? font = null) : base(parent, position, size)
         {
             Font = font ?? Project.Instance.DefaultFont!;
             Text = text;
@@ -79,8 +79,27 @@ namespace MenuEngine.src.elements
 
             foreach (TextChunk chunk in textChunks)
             {
-                Engine.SpriteBatch.DrawString(chunk.Font, chunk.Text, pos, chunk.Color);
-                pos.X += chunk.Font.MeasureString(chunk.Text).X;
+                string[] words = chunk.Text.Split(' ');
+
+                for (int i = 0; i < words.Length; i++)
+                {
+                    string word = words[i];
+                    if (i < words.Length - 1)
+                        word += " ";
+
+                    Vector2 wordSize = chunk.Font.MeasureString(word);
+
+                    // Wrap text if it goes off the edge of the element
+                    if (pos.X + wordSize.X > Pos.ToPixels().X + Size.ToPixels().X)
+                    {
+                        pos.X = Pos.ToPixels().X;
+                        pos.Y += wordSize.Y;
+                    }
+
+                    Engine.SpriteBatch.DrawString(chunk.Font, word, pos, chunk.Color);
+
+                    pos.X += wordSize.X;
+                }
             }
         }
 

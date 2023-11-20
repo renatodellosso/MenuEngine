@@ -14,6 +14,17 @@ namespace MenuEngine.src
 
         public Font? DefaultFont { get; private set; }
 
+        public string Title
+        {
+            get => Engine.Instance.Window?.Title ?? "Window is null!"; protected set
+            {
+                if (Engine.Instance.Window != null)
+                    Engine.Instance.Window.Title = value;
+                else
+                    Debug.WriteLine("Tried to set title before Window is created!");
+            }
+        }
+
         /// <summary>
         /// This method is called before <see cref="Engine.Instance"/> exists.
         /// </summary>
@@ -32,6 +43,8 @@ namespace MenuEngine.src
             RootElement = new RootElement();
 
             DefaultFont = new("Arial");
+
+            Input.Initialize();
 
             OnInitialize();
         }
