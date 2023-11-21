@@ -20,7 +20,7 @@ namespace MenuEngine.src.elements
         { }
 
         public ButtonElement(Element? parent, Vector2 position, Vector2 size, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null,
-            Action? onClick = null) : base(parent, position, size, defaultColor, texture)
+            Action? onClick = null) : base(parent, position, size, defaultColor ?? Color.Black, texture)
         {
             this.hoveredColor = hoveredColor ?? Color.Gray;
             this.onClick = onClick;

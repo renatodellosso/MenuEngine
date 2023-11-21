@@ -9,27 +9,60 @@ namespace MenuEngine.src.elements
     public class TextElement : RectElement
     {
 
+        public enum Justify
+        {
+            Left,
+            Center,
+            Right
+        }
+
+        public enum Align
+        {
+            Top,
+            Center,
+            Bottom
+        }
+
+        public enum Wrapping
+        {
+            Word,
+            Char
+        }
+
         private class TextChunk : IFormattable
         {
             internal TextChunk? Container { get; set; }
 
-            internal string Text { get; set; }
-            internal SpriteFont Font { get; set; }
-            internal Color Color { get; set; }
+            internal string text;
+            internal SpriteFont font;
+            internal Color color;
 
-            internal string[] Args { get; set; }
+            internal string[] args;
+
+            internal Vector2 pos;
+
+            internal Vector2 Size { get => font.MeasureString(text); }
 
             internal TextChunk(string text, string[] args, SpriteFont font, Color color)
             {
-                Text = text;
-                Args = args;
-                Font = font;
-                Color = color;
+                this.text = text;
+                this.args = args;
+                this.font = font;
+                this.color = color;
+            }
+
+            internal TextChunk(string text, TextChunk styling, Vector2 pos)
+            {
+                this.text = text;
+                args = styling.args;
+                font = styling.font;
+                color = styling.color;
+                this.pos = pos;
             }
 
             public string ToString(string? format, IFormatProvider? formatProvider)
             {
-                return Text;
+                return text;
             }
         }
 
@@ -45,29 +78,31 @@ namespace MenuEngine.src.elements
                 string text = "";
                 foreach (TextChunk chunk in textChunks)
                 {
-                    text += chunk.Text;
+                    text += chunk.text;
                 }
                 return text;
             }
-            set
-            {
-                if (value != prevText)
-                {
-                    ParseStringToChunks(value);
-                    prevText = value;
-                }
-            }
         }
 
-        public Font Font { get; set; }
+        public Font font;
 
-        public TextElement(Vector2 position, Vector2 size, string text = "", Font? font = null) : this(null, position, size, text, font)
+        protected Justify justify;
+        protected Align align;
+        protected Wrapping wrapping;
+
+        public TextElement(Vector2 position, Vector2 size, string text = "", Font? font = null, Justify justify = Justify.Left, Align align = Align.Top,
+            Wrapping wrapping = Wrapping.Word) : this(null, position, size, text, font, justify, align, wrapping)
         { }
 
-        public TextElement(Element? parent, Vector2 position, Vector2 size, string text = "", Font? font = null) : base(parent, position, size)
+        public TextElement(Element? parent, Vector2 position, Vector2 size, string text = "", Font? font = null, Justify justify = Justify.Left, Align align = Align.Top,
+            Wrapping wrapping = Wrapping.Word) : base(parent, position, size)
         {
-            Font = font ?? Project.Instance.DefaultFont!;
-            Text = text;
+            this.font = font ?? Project.Instance.DefaultFont!;
+            this.justify = justify;
+            this.align = align;
+            this.wrapping = wrapping;
+
+            SetText(text);
         }
 
         public override void Draw()
@@ -75,31 +110,18 @@ namespace MenuEngine.src.elements
             if (textChunks == null)
                 return;
 
-            Vector2 pos = Pos.ToPixels();
-
             foreach (TextChunk chunk in textChunks)
             {
-                string[] words = chunk.Text.Split(' ');
+                Engine.SpriteBatch.DrawString(chunk.font, chunk.text, chunk.pos, chunk.color);
+            }
+        }
 
-                for (int i = 0; i < words.Length; i++)
-                {
-                    string word = words[i];
-                    if (i < words.Length - 1)
-                        word += " ";
-
-                    Vector2 wordSize = chunk.Font.MeasureString(word);
-
-                    // Wrap text if it goes off the edge of the element
-                    if (pos.X + wordSize.X > Pos.ToPixels().X + Size.ToPixels().X)
-                    {
-                        pos.X = Pos.ToPixels().X;
-                        pos.Y += wordSize.Y;
-                    }
-
-                    Engine.SpriteBatch.DrawString(chunk.Font, word, pos, chunk.Color);
-
-                    pos.X += wordSize.X;
-                }
+        public void SetText(string text)
+        {
+            if (text != prevText)
+            {
+                ParseStringToChunks(text);
+                prevText = text;
             }
         }
 
@@ -107,7 +129,7 @@ namespace MenuEngine.src.elements
         {
             List<TextChunk> chunks = new();
 
-            TextChunk currentChunk = new("", Array.Empty<string>(), Font.Regular, Font.Color);
+            TextChunk currentChunk = new("", Array.Empty<string>(), font.Regular, font.Color);
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -139,13 +161,13 @@ namespace MenuEngine.src.elements
                         // Found an opening tag
 
                         TextChunk prevChunk = currentChunk;
-                        currentChunk = new TextChunk("", args, Font.Regular, Font.Color);
+                        currentChunk = new TextChunk("", args, font.Regular, font.Color);
 
                         // Add previous args to the new chunk, so container formatting carries over
                         List<string> argsList = args.ToList();
-                        argsList.AddRange(prevChunk.Args);
+                        argsList.AddRange(prevChunk.args);
                         args = argsList.ToArray();
-                        currentChunk.Args = args;
+                        currentChunk.args = args;
 
                         currentChunk.Container = prevChunk;
 
@@ -153,11 +175,11 @@ namespace MenuEngine.src.elements
                         bool bold = args.Contains("b"), italic = args.Contains("i");
 
                         if (bold && italic)
-                            currentChunk.Font = Font.BoldItalic ?? Font.Regular;
+                            currentChunk.font = font.BoldItalic ?? font.Regular;
                         else if (bold)
-                            currentChunk.Font = Font.Bold ?? Font.Regular;
+                            currentChunk.font = font.Bold ?? font.Regular;
                         else if (italic)
-                            currentChunk.Font = Font.Italic ?? Font.Regular;
+                            currentChunk.font = font.Italic ?? font.Regular;
 
                         // Check for a color tag
                         IEnumerable<string> colorArgs = args.Where(arg => arg.StartsWith("color="));
@@ -167,23 +189,73 @@ namespace MenuEngine.src.elements
                             string colorName = arg[(arg.IndexOf('=') + 1)..];
 
                             Color color = ((Color?)typeof(Color).GetProperty(colorName)?.GetValue(null)) ?? Color.White;
-                            currentChunk.Color = color;
+                            currentChunk.color = color;
                         }
                     }
                     else
                     {
                         // Found a closing tag
 
-                        currentChunk = new("", currentChunk.Container?.Args ?? Array.Empty<string>(), currentChunk.Container?.Font ?? Font.Regular,
-                            currentChunk.Container?.Color ?? Color.White);
+                        currentChunk = new("", currentChunk.Container?.args ?? Array.Empty<string>(), currentChunk.Container?.font ?? font.Regular,
+                            currentChunk.Container?.color ?? Color.White);
                     }
                 }
-                else currentChunk.Text += text.ElementAt(i);
+                else currentChunk.text += text.ElementAt(i);
             }
 
             chunks.Add(currentChunk);
 
-            textChunks = chunks.ToArray();
+            CalculateCharChunks(chunks.ToArray());
+        }
+
+        /// <summary>
+        /// Converts the text chunks into character chunks, so that each character can be drawn individually.
+        /// </summary>
+        /// <param name="chunks"></param>
+        private void CalculateCharChunks(TextChunk[] chunks)
+        {
+            List<TextChunk> charChunks = new();
+
+            Vector2 pos = Pos.ToPixels();
+
+            void NewLine()
+            {
+                pos = new(Pos.ToPixels().X, pos.Y + font.Regular.MeasureString("A").Y);
+            }
+
+            foreach (TextChunk chunk in chunks)
+            {
+                string[] words = chunk.text.Split(' ');
+                for (int i = 0; i < words.Length - 1; i++)
+                    words[i] += " ";
+
+                foreach (string word in words)
+                {
+                    if (wrapping == Wrapping.Word && pos.X + chunk.font.MeasureString(word).X > Pos.ToPixels().X + Size.ToPixels().X)
+                    {
+                        // Word is too long for the line, move to the next line
+                        NewLine();
+                    }
+
+                    foreach (char c in word)
+                    {
+                        if (c == '\n')
+                        {
+                            NewLine();
+                            continue;
+                        }
+
+                        if (wrapping == Wrapping.Char && pos.X + chunk.font.MeasureString(c.ToString()).X > Pos.ToPixels().X + Size.ToPixels().X)
+                            NewLine();
+
+                        TextChunk charChunk = new(c.ToString(), chunk, pos);
+                        charChunks.Add(charChunk);
+                        pos.X += charChunk.Size.X;
+                    }
+                }
+            }
+
+            textChunks = charChunks.ToArray();
         }
     }
 }
