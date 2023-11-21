@@ -255,6 +255,100 @@ namespace MenuEngine.src.elements
                 }
             }
 
+            // If we're using default settings, we don't need to do any more calculations
+            if (justify == Justify.Left && align == Align.Top)
+            {
+                textChunks = charChunks.ToArray();
+                return;
+            }
+
+            // Calculate the width and height of each line and the text
+
+            // Group the chunks into lines
+            List<List<TextChunk>> lines = new();
+            foreach (TextChunk chunk in charChunks)
+            {
+                if (lines.Count == 0)
+                    lines.Add(new List<TextChunk>());
+
+                List<TextChunk> line = lines[^1]; // Index from end
+
+                if (line.Any() && chunk.pos.Y != line[0].pos.Y)
+                    lines.Add(new List<TextChunk>());
+
+                lines[^1].Add(chunk);
+            }
+
+            // Calculate the size of each line
+            List<KeyValuePair<List<TextChunk>, Vector2>> lineSizes = new();
+            foreach (List<TextChunk> line in lines)
+            {
+                Vector2 size = Vector2.Zero;
+                foreach (TextChunk chunk in line)
+                    size.X += chunk.Size.X;
+
+                size.Y = line[0].Size.Y;
+
+                lineSizes.Add(new(line, size));
+            }
+
+            // Calculate the total size of the text
+            Vector2 textSize = Vector2.Zero;
+            foreach (KeyValuePair<List<TextChunk>, Vector2> line in lineSizes)
+            {
+                textSize.X = Math.Max(textSize.X, line.Value.X);
+                textSize.Y += line.Value.Y;
+            }
+
+            if (justify == Justify.Right)
+            {
+                foreach (KeyValuePair<List<TextChunk>, Vector2> line in lineSizes)
+                {
+                    float x = Pos.ToPixels().X + Size.ToPixels().X - line.Value.X;
+                    foreach (TextChunk chunk in line.Key)
+                    {
+                        chunk.pos.X = x;
+                        x += chunk.Size.X;
+                    }
+                }
+            }
+            else if (justify == Justify.Center)
+            {
+                foreach (KeyValuePair<List<TextChunk>, Vector2> line in lineSizes)
+                {
+                    float x = Pos.ToPixels().X + (Size.ToPixels().X - line.Value.X) / 2;
+                    foreach (TextChunk chunk in line.Key)
+                    {
+                        chunk.pos.X = x;
+                        x += chunk.Size.X;
+                    }
+                }
+            }
+
+            if (align == Align.Center)
+            {
+                float y = Pos.ToPixels().Y + (Size.ToPixels().Y - textSize.Y) / 2;
+                foreach (KeyValuePair<List<TextChunk>, Vector2> line in lineSizes)
+                {
+                    foreach (TextChunk chunk in line.Key)
+                        chunk.pos.Y = y;
+
+                    y += line.Value.Y;
+                }
+            }
+
+            if (align == Align.Bottom)
+            {
+                float y = Pos.ToPixels().Y + Size.ToPixels().Y - textSize.Y;
+                foreach (KeyValuePair<List<TextChunk>, Vector2> line in lineSizes)
+                {
+                    foreach (TextChunk chunk in line.Key)
+                        chunk.pos.Y = y;
+
+                    y += line.Value.Y;
+                }
+            }
+
             textChunks = charChunks.ToArray();
         }
     }

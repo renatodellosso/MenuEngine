@@ -15,15 +15,27 @@ namespace MenuEngine.src.elements
 
         private Action? onClick;
 
-        public ButtonElement(Vector2 position, Vector2 size, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null, Action? onClick = null)
-            : this(null, position, size, defaultColor, hoveredColor, texture, onClick)
+        public ButtonElement(Vector2 position, Vector2 size, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null, Action? onClick = null,
+            uint borderThickness = 0, Color? borderColor = null, string labelText = "")
+            : this(null, position, size, defaultColor, hoveredColor, texture, onClick, borderThickness, borderColor, labelText)
         { }
 
         public ButtonElement(Element? parent, Vector2 position, Vector2 size, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null,
-            Action? onClick = null) : base(parent, position, size, defaultColor ?? Color.Black, texture)
+            Action? onClick = null, uint borderThickness = 0, Color? borderColor = null, string labelText = "")
+            : base(parent, position, size, defaultColor ?? Color.Black, texture)
         {
             this.hoveredColor = hoveredColor ?? Color.Gray;
             this.onClick = onClick;
+
+            if (borderThickness > 0 && borderColor != null)
+            {
+                _ = new BorderElement(this, borderThickness, borderColor.Value);
+            }
+
+            if (labelText != "")
+            {
+                _ = new TextElement(this, Pos, Size, labelText, justify: TextElement.Justify.Center, align: TextElement.Align.Center);
+            }
         }
 
         public override void Update()

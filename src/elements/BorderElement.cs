@@ -8,7 +8,7 @@ namespace MenuEngine.src.elements
         /// <summary>
         /// Border thickness, in pixels.
         /// </summary>
-        protected int thickness;
+        protected uint thickness;
 
         public override Vector2 Pos
         {
@@ -35,7 +35,7 @@ namespace MenuEngine.src.elements
         }
 
         /// <param name="thickness">Border thickness, in pixels.</param>
-        public BorderElement(RectElement parent, int thickness, Color color) : base(parent, Vector2.Zero, Vector2.Zero, color)
+        public BorderElement(RectElement parent, uint thickness, Color color) : base(parent, Vector2.Zero, Vector2.Zero, color)
         {
             this.thickness = thickness;
         }
