@@ -27,15 +27,11 @@ namespace MenuEngine.src.elements
             this.hoveredColor = hoveredColor ?? Color.Gray;
             this.onClick = onClick;
 
-            if (borderThickness > 0 && borderColor != null)
-            {
-                _ = new BorderElement(this, borderThickness, borderColor.Value);
-            }
+            if (borderThickness > 0)
+                _ = new BorderElement(this, borderThickness, borderColor ?? Color.White);
 
             if (labelText != "")
-            {
                 _ = new TextElement(this, Pos, Size, labelText, justify: TextElement.Justify.Center, align: TextElement.Align.Center);
-            }
         }
 
         public override void Update()

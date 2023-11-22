@@ -11,7 +11,7 @@ namespace MenuEngine.src
 
         private readonly Project project;
 
-        private GraphicsDeviceManager graphics;
+        internal GraphicsDeviceManager graphics;
 
         private SpriteBatch spriteBatch;
         public static SpriteBatch SpriteBatch => Instance.spriteBatch;
@@ -79,7 +79,6 @@ namespace MenuEngine.src
             deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             OnUpdate?.Invoke();
-
             OnLateUpdate?.Invoke();
 
             base.Update(gameTime);
@@ -89,10 +88,8 @@ namespace MenuEngine.src
         {
             GraphicsDevice.Clear(Color.Black);
 
-            spriteBatch.Begin();
-
+            spriteBatch.Begin(samplerState: SamplerState.PointClamp);
             OnDraw?.Invoke();
-
             spriteBatch.End();
 
             base.Draw(gameTime);

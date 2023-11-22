@@ -41,7 +41,17 @@ namespace MenuEngine.src.elements
 
             internal Vector2 pos;
 
-            internal Vector2 Size { get => font.MeasureString(text); }
+            internal Vector2 Size
+            {
+                get
+                {
+                    Vector2 size = font.MeasureString(text);
+                    size.X += font.Spacing * text.Length;
+                    return size;
+                }
+            }
+
+            internal Vector2 MeasuredSize => font.MeasureString(text);
 
             internal TextChunk(string text, string[] args, SpriteFont font, Color color)
             {
@@ -214,7 +224,7 @@ namespace MenuEngine.src.elements
         /// <param name="chunks"></param>
         private void CalculateCharChunks(TextChunk[] chunks)
         {
-            List<TextChunk> charChunks = new();
+            List<TextChunk> chunkList = new();
 
             Vector2 pos = Pos.ToPixels();
 
@@ -249,24 +259,15 @@ namespace MenuEngine.src.elements
                             NewLine();
 
                         TextChunk charChunk = new(c.ToString(), chunk, pos);
-                        charChunks.Add(charChunk);
+                        chunkList.Add(charChunk);
                         pos.X += charChunk.Size.X;
                     }
                 }
             }
 
-            // If we're using default settings, we don't need to do any more calculations
-            if (justify == Justify.Left && align == Align.Top)
-            {
-                textChunks = charChunks.ToArray();
-                return;
-            }
-
-            // Calculate the width and height of each line and the text
-
             // Group the chunks into lines
             List<List<TextChunk>> lines = new();
-            foreach (TextChunk chunk in charChunks)
+            foreach (TextChunk chunk in chunkList)
             {
                 if (lines.Count == 0)
                     lines.Add(new List<TextChunk>());
@@ -279,13 +280,47 @@ namespace MenuEngine.src.elements
                 lines[^1].Add(chunk);
             }
 
+            // Merge chunks with the same font and color that are on the same line
+            for (int i = 0; i < lines.Count; i++)
+            {
+                List<TextChunk> line = lines[i];
+
+                for (int j = 0; j < line.Count; j++)
+                {
+                    TextChunk chunk = line[j];
+
+                    if (j == 0)
+                        continue;
+
+                    TextChunk prevChunk = line[j - 1];
+
+                    if (chunk.font == prevChunk.font && chunk.color == prevChunk.color)
+                    {
+                        prevChunk.text += chunk.text;
+                        line.Remove(chunk);
+                        j--;
+                    }
+                }
+            }
+
+            chunkList = lines.SelectMany(line => line).ToList();
+
+            // If we're using default settings, we don't need to do any more calculations
+            if (justify == Justify.Left && align == Align.Top)
+            {
+                textChunks = chunkList.ToArray();
+                return;
+            }
+
+            // Calculate the width and height of each line and the text
+
             // Calculate the size of each line
             List<KeyValuePair<List<TextChunk>, Vector2>> lineSizes = new();
             foreach (List<TextChunk> line in lines)
             {
                 Vector2 size = Vector2.Zero;
                 foreach (TextChunk chunk in line)
-                    size.X += chunk.Size.X;
+                    size.X += chunk.MeasuredSize.X;
 
                 size.Y = line[0].Size.Y;
 
@@ -317,6 +352,7 @@ namespace MenuEngine.src.elements
                 foreach (KeyValuePair<List<TextChunk>, Vector2> line in lineSizes)
                 {
                     float x = Pos.ToPixels().X + (Size.ToPixels().X - line.Value.X) / 2;
+
                     foreach (TextChunk chunk in line.Key)
                     {
                         chunk.pos.X = x;
@@ -349,7 +385,7 @@ namespace MenuEngine.src.elements
                 }
             }
 
-            textChunks = charChunks.ToArray();
+            textChunks = chunkList.ToArray();
         }
     }
 }

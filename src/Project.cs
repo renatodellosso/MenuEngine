@@ -46,6 +46,8 @@ namespace MenuEngine.src
 
             Input.Initialize();
 
+            EnableFullScreen();
+
             OnInitialize();
         }
 
@@ -66,6 +68,15 @@ namespace MenuEngine.src
             Assets.LoadAsset<SpriteFont>("ArialBold");
             Assets.LoadAsset<SpriteFont>("ArialItalic");
             Assets.LoadAsset<SpriteFont>("ArialBoldItalic");
+        }
+
+        public static void EnableFullScreen()
+        {
+            Engine.Instance.graphics.PreferredBackBufferHeight = Engine.Instance.GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            Engine.Instance.graphics.PreferredBackBufferWidth = Engine.Instance.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            Engine.Instance.graphics.IsFullScreen = true;
+            Engine.Instance.graphics.HardwareModeSwitch = false; // Not sure what this actually is
+            Engine.Instance.graphics.ApplyChanges(); // Make sure to apply changes!
         }
 
     }
