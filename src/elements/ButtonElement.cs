@@ -7,13 +7,15 @@ namespace MenuEngine.src.elements
     public class ButtonElement : TextureRendererElement
     {
 
-        private bool isMouseOver;
+        protected bool isMouseOver;
 
         private Color defaultColor, hoveredColor;
 
         protected override Color Color { get => isMouseOver ? hoveredColor : defaultColor; set => defaultColor = value; }
 
         private Action? onClick;
+
+        protected TextElement? Label { get; set; }
 
         public ButtonElement(Vector2 position, Vector2 size, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null, Action? onClick = null,
             uint borderThickness = 0, Color? borderColor = null, string labelText = "")
@@ -31,14 +33,14 @@ namespace MenuEngine.src.elements
                 _ = new BorderElement(this, borderThickness, borderColor ?? Color.White);
 
             if (labelText != "")
-                _ = new TextElement(this, Pos, Size, labelText, justify: TextElement.Justify.Center, align: TextElement.Align.Center);
+                Label = new TextElement(this, Pos, Size, labelText, justify: TextElement.Justify.Center, align: TextElement.Align.Center);
         }
 
         public override void Update()
         {
             isMouseOver = Input.IsMouseOver(Rect);
 
-            if (Input.IsMouseButtonDown(Input.MouseButton.Left))
+            if (isMouseOver && Input.IsMouseButtonDown(Input.MouseButton.Left))
                 OnClick();
         }
 

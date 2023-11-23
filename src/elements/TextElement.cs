@@ -84,23 +84,57 @@ namespace MenuEngine.src.elements
             }
         }
 
+        public string RawText
+        {
+            get
+            {
+                if (textChunks == null)
+                    return "";
+
+                string text = "";
+                foreach (TextChunk chunk in textChunks)
+                {
+                    string args = "<";
+                    foreach (string arg in chunk.args)
+                    {
+                        args += arg + " ";
+                    }
+                    args = args.TrimEnd(' ') + ">";
+                    text += args + chunk.text + "</>";
+                }
+                return text;
+            }
+        }
+
         public Font font;
 
-        protected Justify justify;
-        protected Align align;
-        protected Wrapping wrapping;
+        /// <summary>
+        /// Call <see cref="RegenerateText"/> after changing this.
+        /// </summary>
+        public Justify justify;
+        /// <summary>
+        /// Call <see cref="RegenerateText"/> after changing this.
+        /// </summary>
+        public Align align;
+        /// <summary>
+        /// Call <see cref="RegenerateText"/> after changing this.
+        /// </summary>
+        public Wrapping wrapping;
+
+        public Color Color { get; set; }
 
         public TextElement(Vector2 position, Vector2 size, string text = "", Font? font = null, Justify justify = Justify.Left, Align align = Align.Top,
-            Wrapping wrapping = Wrapping.Word) : this(null, position, size, text, font, justify, align, wrapping)
+            Wrapping wrapping = Wrapping.Word, Color? color = null) : this(null, position, size, text, font, justify, align, wrapping, color)
         { }
 
         public TextElement(Element? parent, Vector2 position, Vector2 size, string text = "", Font? font = null, Justify justify = Justify.Left, Align align = Align.Top,
-            Wrapping wrapping = Wrapping.Word) : base(parent, position, size)
+            Wrapping wrapping = Wrapping.Word, Color? color = null) : base(parent, position, size)
         {
             this.font = font ?? Project.Instance.DefaultFont!;
             this.justify = justify;
             this.align = align;
             this.wrapping = wrapping;
+            Color = color ?? Color.White;
 
             SetText(text);
         }
@@ -123,6 +157,14 @@ namespace MenuEngine.src.elements
                 ParseStringToChunks(text);
                 prevText = text;
             }
+        }
+
+        /// <summary>
+        /// Call this after changing any formatting properties.
+        /// </summary>
+        public void RegenerateText()
+        {
+            ParseStringToChunks(RawText);
         }
 
         private void ParseStringToChunks(string text)
@@ -197,7 +239,7 @@ namespace MenuEngine.src.elements
                         // Found a closing tag
 
                         currentChunk = new("", currentChunk.Container?.args ?? Array.Empty<string>(), currentChunk.Container?.font ?? font.Regular,
-                            currentChunk.Container?.color ?? Color.White);
+                            currentChunk.Container?.color ?? Color);
                     }
                 }
                 else currentChunk.text += text.ElementAt(i);

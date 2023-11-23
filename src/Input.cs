@@ -68,6 +68,13 @@ namespace MenuEngine.src
 
         private MouseState prevMouseState;
 
+        /// <summary>
+        /// In ms.
+        /// </summary>
+        private const long TEXT_INPUT_INTERVAL = 25;
+        private long? lastTextInputTime;
+        private char? lastTextInputChar;
+
         private Input()
         {
             keyStates = new();
@@ -107,8 +114,21 @@ namespace MenuEngine.src
 
         private void OnTextInput(object? sender, TextInputEventArgs e)
         {
-            if (mode == InputMode.TextInput)
+            if (mode != InputMode.TextInput)
+                return;
+
+            if (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond + TEXT_INPUT_INTERVAL > lastTextInputTime)
+            {
+                lastTextInputChar = null;
+            }
+
+            if (mode == InputMode.TextInput && (lastTextInputChar == null || lastTextInputChar != e.Character))
+            {
                 textInputHandler?.Invoke(e.Character);
+
+                lastTextInputChar = e.Character;
+                lastTextInputTime = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+            }
         }
 
         /// <returns>Whether key is being pressed down. Always returns false when <see cref="Mode"/> is <see cref="InputMode.TextInput"/>.</returns>
