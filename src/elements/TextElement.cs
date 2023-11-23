@@ -41,17 +41,7 @@ namespace MenuEngine.src.elements
 
             internal Vector2 pos;
 
-            internal Vector2 Size
-            {
-                get
-                {
-                    Vector2 size = font.MeasureString(text);
-                    size.X += font.Spacing * text.Length;
-                    return size;
-                }
-            }
-
-            internal Vector2 MeasuredSize => font.MeasureString(text);
+            internal Vector2 Size => font.MeasureString(text);
 
             internal TextChunk(string text, string[] args, SpriteFont font, Color color)
             {
@@ -241,7 +231,7 @@ namespace MenuEngine.src.elements
 
                 foreach (string word in words)
                 {
-                    if (wrapping == Wrapping.Word && pos.X + chunk.font.MeasureString(word).X > Pos.ToPixels().X + Size.ToPixels().X)
+                    if (wrapping == Wrapping.Word && pos.X + chunk.font.MeasureString(word).X + chunk.font.Spacing * word.Length > Pos.ToPixels().X + Size.ToPixels().X)
                     {
                         // Word is too long for the line, move to the next line
                         NewLine();
@@ -260,7 +250,7 @@ namespace MenuEngine.src.elements
 
                         TextChunk charChunk = new(c.ToString(), chunk, pos);
                         chunkList.Add(charChunk);
-                        pos.X += charChunk.Size.X;
+                        pos.X += charChunk.Size.X + chunk.font.Spacing * charChunk.text.Length;
                     }
                 }
             }
@@ -312,15 +302,13 @@ namespace MenuEngine.src.elements
                 return;
             }
 
-            // Calculate the width and height of each line and the text
-
             // Calculate the size of each line
             List<KeyValuePair<List<TextChunk>, Vector2>> lineSizes = new();
             foreach (List<TextChunk> line in lines)
             {
                 Vector2 size = Vector2.Zero;
                 foreach (TextChunk chunk in line)
-                    size.X += chunk.MeasuredSize.X;
+                    size.X += chunk.Size.X;
 
                 size.Y = line[0].Size.Y;
 
