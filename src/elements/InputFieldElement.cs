@@ -14,14 +14,16 @@ namespace MenuEngine.src.elements
 
         private bool cursorDisplayedPrev;
 
+        private Action<string>? onSubmit;
+
         public InputFieldElement(Vector2 position, Vector2 size, string defaultText, Color? defaultTextColor = null, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null,
-            uint borderThickness = 1, Color? borderColor = null)
-            : this(null, position, size, defaultText, defaultTextColor, defaultColor, hoveredColor, texture, borderThickness, borderColor)
+            uint borderThickness = 1, Color? borderColor = null, Action<string>? onSubmit = null)
+            : this(null, position, size, defaultText, defaultTextColor, defaultColor, hoveredColor, texture, borderThickness, borderColor, onSubmit)
         {
         }
 
         public InputFieldElement(Element? parent, Vector2 position, Vector2 size, string defaultText, Color? defaultTextColor = null, Color? defaultColor = null,
-            Color? hoveredColor = null, Texture2D? texture = null, uint borderThickness = 1, Color? borderColor = null)
+            Color? hoveredColor = null, Texture2D? texture = null, uint borderThickness = 1, Color? borderColor = null, Action<string>? onSubmit = null)
             : base(parent, position, size, defaultColor, hoveredColor, texture, borderThickness: borderThickness, borderColor: borderColor, labelText: defaultText)
         {
             Label!.justify = TextElement.Justify.Left;
@@ -29,6 +31,8 @@ namespace MenuEngine.src.elements
 
             text = "";
             this.defaultText = defaultText;
+
+            this.onSubmit = onSubmit;
         }
 
         public override void Update()
@@ -84,9 +88,10 @@ namespace MenuEngine.src.elements
         /// <summary>
         /// Runs when the user presses enter while the input field is selected.
         /// </summary>
-        protected virtual void Submit()
+        public virtual void Submit()
         {
             Debug.WriteLine($"Input field submitted: {text}");
+            onSubmit?.Invoke(text);
         }
     }
 }

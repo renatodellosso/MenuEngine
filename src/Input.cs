@@ -75,9 +75,12 @@ namespace MenuEngine.src
         private long? lastTextInputTime;
         private char? lastTextInputChar;
 
+        private Dictionary<Keys, Action> keyListeners;
+
         private Input()
         {
             keyStates = new();
+            keyListeners = new();
         }
 
         internal static void Initialize()
@@ -104,7 +107,11 @@ namespace MenuEngine.src
                 keyStates[e.Key] = InputState.Held;
             }
             else
+            {
                 keyStates.Add(e.Key, InputState.Down);
+                keyListeners.TryGetValue(e.Key, out Action? listener);
+                listener?.Invoke();
+            }
         }
 
         private void OnKeyUp(object? sender, InputKeyEventArgs e)
@@ -187,6 +194,22 @@ namespace MenuEngine.src
         {
             MouseState mouseState = Mouse.GetState();
             return rect.Contains(mouseState.Position.ToVector2());
+        }
+
+        public static void AddKeyListener(Keys key, Action listener)
+        {
+            if (!instance?.keyListeners.TryAdd(key, listener) ?? false)
+                instance!.keyListeners[key] += listener;
+        }
+
+        public static void RemoveKeyListener(Keys key, Action listener)
+        {
+            if (instance?.keyListeners.TryGetValue(key, out Action? currentListener) ?? false)
+            {
+                currentListener -= listener;
+                if (currentListener == null)
+                    instance!.keyListeners.Remove(key);
+            }
         }
 
     }

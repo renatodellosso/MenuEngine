@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace MenuEngine.src
 {
@@ -15,21 +16,33 @@ namespace MenuEngine.src
             assets = new Dictionary<string, object>();
         }
 
-        internal void LoadAssets()
-        {
-
-        }
-
         /// <summary>
         /// Will not add the asset if it is null.
         /// </summary>
-        public static void LoadAsset<T>(string path)
+        public static T LoadAsset<T>(string path)
         {
-            T asset = Engine.Instance.Content.Load<T>(path);
+            T asset = LoadAssetFromFile<T>(path);
 
-            if (asset == null) return;
+            if (asset == null) return default;
 
             instance.assets.TryAdd(path, asset);
+
+            return asset;
+        }
+
+        public static T LoadAssetFromFile<T>(string path)
+        {
+            return Engine.Instance.Content.Load<T>(path);
+        }
+
+        public static Tilesheet LoadTilesheet(string path, int tileWidth, int tileHeight, int tilePadding)
+        {
+            Texture2D texture = LoadAssetFromFile<Texture2D>(path);
+
+            Tilesheet tilesheet = new(texture, tileWidth, tileHeight, tilePadding);
+            instance.assets.TryAdd(path, tilesheet);
+
+            return tilesheet;
         }
 
         /// <summary>

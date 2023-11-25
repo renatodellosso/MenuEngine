@@ -19,7 +19,7 @@ namespace MenuEngine.src.elements
 
         public override void Draw()
         {
-            Engine.SpriteBatch.Draw(Assets.GetAsset<Texture2D>("BlankTexture"), Pos.ToPixels(), Utils.RectFromPercents(Pos, Size), Color);
+            Engine.SpriteBatch.Draw(Texture, Utils.RectFromPercents(Pos, Size), Color);
         }
     }
 }
