@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Diagnostics;
 
 namespace MenuEngine.src
 {
@@ -93,6 +94,15 @@ namespace MenuEngine.src
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        /// <summary>
+        /// Exits the program.
+        /// </summary>
+        public static void Quit()
+        {
+            Debug.WriteLine("Quitting...");
+            Instance.Exit();
         }
     }
 }

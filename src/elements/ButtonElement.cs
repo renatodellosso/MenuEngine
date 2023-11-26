@@ -18,12 +18,12 @@ namespace MenuEngine.src.elements
         protected TextElement? Label { get; set; }
 
         public ButtonElement(Vector2 position, Vector2 size, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null, Action? onClick = null,
-            uint borderThickness = 0, Color? borderColor = null, string labelText = "")
+            uint borderThickness = 1, Color? borderColor = null, string labelText = "")
             : this(null, position, size, defaultColor, hoveredColor, texture, onClick, borderThickness, borderColor, labelText)
         { }
 
         public ButtonElement(Element? parent, Vector2 position, Vector2 size, Color? defaultColor = null, Color? hoveredColor = null, Texture2D? texture = null,
-            Action? onClick = null, uint borderThickness = 0, Color? borderColor = null, string labelText = "")
+            Action? onClick = null, uint borderThickness = 1, Color? borderColor = null, string labelText = "")
             : base(parent, position, size, defaultColor ?? Color.Black, texture)
         {
             this.hoveredColor = hoveredColor ?? Color.Gray;
