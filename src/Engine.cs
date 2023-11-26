@@ -102,7 +102,9 @@ namespace MenuEngine.src
         public static void Quit()
         {
             Debug.WriteLine("Quitting...");
+            Project.Instance.OnExit();
             Instance.Exit();
+            Environment.Exit(0);
         }
     }
 }

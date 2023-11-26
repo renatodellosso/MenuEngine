@@ -77,6 +77,11 @@ namespace MenuEngine.src
             Assets.LoadAsset<SpriteFont>("ArialBoldItalic");
         }
 
+        public virtual void OnExit()
+        {
+
+        }
+
         public static void EnableFullScreen()
         {
             Engine.Instance.graphics.PreferredBackBufferHeight = Engine.Instance.GraphicsDevice.Adapter.CurrentDisplayMode.Height;
