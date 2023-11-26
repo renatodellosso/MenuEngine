@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace MenuEngine.src
@@ -42,10 +43,9 @@ namespace MenuEngine.src
         {
             RemoveEventListeners();
 
-            foreach (Element child in children)
-            {
-                child.Dispose();
-            }
+            // Dispose appears to remove the element from the list, so we just keep removing the first element until there are none left.
+            while (children.Any())
+                children[0].Dispose();
 
             Parent?.children.Remove(this);
         }
