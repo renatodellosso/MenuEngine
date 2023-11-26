@@ -1,7 +1,9 @@
 ﻿using MenuEngine.src.elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace MenuEngine.src
 {
@@ -24,6 +26,11 @@ namespace MenuEngine.src
                     Debug.WriteLine("Tried to set title before Window is created!");
             }
         }
+
+        protected string author = "Unknown", projectName = "Unnamed Project";
+
+        public static string PersistantDataPath =>
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Instance.author, Instance.projectName);
 
         /// <summary>
         /// This method is called before <see cref="Engine.Instance"/> exists.
