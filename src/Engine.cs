@@ -8,7 +8,7 @@ namespace MenuEngine.src
     public class Engine : Game
     {
 
-        internal static Engine Instance { get; private set; }
+        public static Engine Instance { get; private set; }
 
         private readonly Project project;
 
